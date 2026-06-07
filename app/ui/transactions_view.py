@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTableWidget, QTableWidgetItem, QHBoxLayout, QFileDialog, QMessageBox
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTableWidget, QTableWidgetItem, QHBoxLayout, QFileDialog, QMessageBox, QLabel, QLineEdit, QFrame
 from PySide6.QtCore import Qt
 from ..database import get_session
 from ..services.transaction_service import get_transactions, add_transaction
@@ -12,23 +12,70 @@ class TransactionsView(QWidget):
         super().__init__()
         self.dashboard_callback = dashboard_callback
         layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(16)
         
-        btn_layout = QHBoxLayout()
-        self.add_btn = QPushButton("+ Add Transaction")
-        self.import_btn = QPushButton("Import CSV")
-        self.export_btn = QPushButton("Export Excel")
-        self.refresh_btn = QPushButton("Refresh")
+        # Header
+        header_layout = QHBoxLayout()
+        title = QLabel("💳 Transactions")
+        title.setStyleSheet("font-size: 28px; font-weight: bold; color: #e2e8f0;")
+        header_layout.addWidget(title)
+        header_layout.addStretch()
+        layout.addLayout(header_layout)
+        
+        # Search bar
+        search_layout = QHBoxLayout()
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("🔍 Search transactions...")
+        self.search_input.setFixedWidth(300)
+        self.search_input.setStyleSheet("""
+            QLineEdit {
+                padding: 10px 16px;
+                border-radius: 8px;
+                border: 2px solid #334155;
+                background: #1e293b;
+                color: #e2e8f0;
+                font-size: 14px;
+            }
+            QLineEdit:focus {
+                border: 2px solid #0ea5e9;
+            }
+        """)
+        self.search_input.textChanged.connect(self.filter_table)
+        search_layout.addWidget(self.search_input)
+        search_layout.addStretch()
+        layout.addLayout(search_layout)
+        
+        # Action buttons in a styled container
+        btn_container = QFrame()
+        btn_container.setObjectName("btnContainer")
+        btn_layout = QHBoxLayout(btn_container)
+        btn_layout.setContentsMargins(0, 0, 0, 0)
+        btn_layout.setSpacing(12)
+        
+        self.add_btn = QPushButton("➕ Add Transaction")
+        self.import_btn = QPushButton("📥 Import CSV")
+        self.export_btn = QPushButton("📤 Export Excel")
+        self.refresh_btn = QPushButton("🔄 Refresh")
+        
+        for btn in [self.add_btn, self.import_btn, self.export_btn, self.refresh_btn]:
+            btn.setCursor(Qt.PointingHandCursor)
+        
         btn_layout.addWidget(self.add_btn)
         btn_layout.addWidget(self.import_btn)
         btn_layout.addWidget(self.export_btn)
         btn_layout.addStretch()
         btn_layout.addWidget(self.refresh_btn)
-        layout.addLayout(btn_layout)
+        layout.addWidget(btn_container)
         
+        # Table with enhanced styling
         self.table = QTableWidget()
         self.table.setColumnCount(7)
         self.table.setHorizontalHeaderLabels(["Date", "Account", "Category", "Type", "Amount", "Curr", "Description"])
         self.table.horizontalHeader().setStretchLastSection(True)
+        self.table.setAlternatingRowColors(True)
+        self.table.setSelectionBehavior(QTableWidget.SelectRows)
+        self.table.verticalHeader().setVisible(False)
         layout.addWidget(self.table)
         
         self.add_btn.clicked.connect(self.add_tx)
@@ -37,6 +84,18 @@ class TransactionsView(QWidget):
         self.export_btn.clicked.connect(self.export_excel)
         
         self.load_data()
+    
+    def filter_table(self, text):
+        """Filter table rows based on search text"""
+        search_text = text.lower()
+        for row in range(self.table.rowCount()):
+            match = False
+            for col in range(self.table.columnCount()):
+                item = self.table.item(row, col)
+                if item and search_text in item.text().lower():
+                    match = True
+                    break
+            self.table.setRowHidden(row, not match)
     
     def load_data(self):
         with get_session() as session:
@@ -54,6 +113,10 @@ class TransactionsView(QWidget):
                 
                 self.table.setItem(i, 5, QTableWidgetItem(tx.original_currency))
                 self.table.setItem(i, 6, QTableWidgetItem(tx.description))
+        
+        # Auto-resize columns
+        self.table.resizeColumnsToContents()
+        
         if self.dashboard_callback:
             self.dashboard_callback()
     
