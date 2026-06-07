@@ -15,30 +15,42 @@ class TransactionsView(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(16)
         
-        # Header
+        # Header with cyber styling
         header_layout = QHBoxLayout()
-        title = QLabel("💳 Transactions")
-        title.setStyleSheet("font-size: 28px; font-weight: bold; color: #e2e8f0;")
+        title = QLabel("◇ TRANSACTIONS")
+        title.setStyleSheet("""
+            font-size: 24px; 
+            font-weight: bold; 
+            color: #00ffff;
+            font-family: 'Consolas', monospace;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        """)
         header_layout.addWidget(title)
         header_layout.addStretch()
         layout.addLayout(header_layout)
         
-        # Search bar
+        # Search bar with cyber styling
         search_layout = QHBoxLayout()
         self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("🔍 Search transactions...")
-        self.search_input.setFixedWidth(300)
+        self.search_input.setPlaceholderText(">>> SEARCH TRANSACTIONS...")
+        self.search_input.setFixedWidth(350)
         self.search_input.setStyleSheet("""
             QLineEdit {
-                padding: 10px 16px;
-                border-radius: 8px;
-                border: 2px solid #334155;
-                background: #1e293b;
-                color: #e2e8f0;
-                font-size: 14px;
+                padding: 12px 16px;
+                border-radius: 4px;
+                border: 2px solid #00ffff;
+                background: #0d1117;
+                color: #00ffff;
+                font-size: 13px;
+                font-family: 'Consolas', monospace;
             }
             QLineEdit:focus {
-                border: 2px solid #0ea5e9;
+                border: 2px solid #ffffff;
+                background: #0f1520;
+            }
+            QLineEdit::placeholder {
+                color: rgba(0,255,255,0.5);
             }
         """)
         self.search_input.textChanged.connect(self.filter_table)
@@ -53,10 +65,10 @@ class TransactionsView(QWidget):
         btn_layout.setContentsMargins(0, 0, 0, 0)
         btn_layout.setSpacing(12)
         
-        self.add_btn = QPushButton("➕ Add Transaction")
-        self.import_btn = QPushButton("📥 Import CSV")
-        self.export_btn = QPushButton("📤 Export Excel")
-        self.refresh_btn = QPushButton("🔄 Refresh")
+        self.add_btn = QPushButton("➕ ADD TRANSACTION")
+        self.import_btn = QPushButton("📥 IMPORT CSV")
+        self.export_btn = QPushButton("📤 EXPORT EXCEL")
+        self.refresh_btn = QPushButton("🔄 REFRESH")
         
         for btn in [self.add_btn, self.import_btn, self.export_btn, self.refresh_btn]:
             btn.setCursor(Qt.PointingHandCursor)
@@ -68,10 +80,10 @@ class TransactionsView(QWidget):
         btn_layout.addWidget(self.refresh_btn)
         layout.addWidget(btn_container)
         
-        # Table with enhanced styling
+        # Table with enhanced cyber styling
         self.table = QTableWidget()
         self.table.setColumnCount(7)
-        self.table.setHorizontalHeaderLabels(["Date", "Account", "Category", "Type", "Amount", "Curr", "Description"])
+        self.table.setHorizontalHeaderLabels(["DATE", "ACCOUNT", "CATEGORY", "TYPE", "AMOUNT", "CURR", "DESCRIPTION"])
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.setAlternatingRowColors(True)
         self.table.setSelectionBehavior(QTableWidget.SelectRows)
@@ -105,7 +117,7 @@ class TransactionsView(QWidget):
                 self.table.setItem(i, 0, QTableWidgetItem(str(tx.date)))
                 self.table.setItem(i, 1, QTableWidgetItem(tx.account.name))
                 self.table.setItem(i, 2, QTableWidgetItem(f"{tx.category.icon} {tx.category.name}"))
-                self.table.setItem(i, 3, QTableWidgetItem(tx.type))
+                self.table.setItem(i, 3, QTableWidgetItem(tx.type.upper()))
                 
                 amt_item = QTableWidgetItem(f"{tx.original_amount:,.2f}")
                 amt_item.setForeground(Qt.darkGreen if tx.type == "income" else Qt.darkRed)

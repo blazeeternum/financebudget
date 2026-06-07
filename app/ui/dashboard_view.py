@@ -13,10 +13,17 @@ class DashboardView(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(20)
         
-        # Header with welcome message
+        # Header with cyber styling
         header_layout = QHBoxLayout()
-        title = QLabel("📊 Dashboard Overview")
-        title.setStyleSheet("font-size: 28px; font-weight: bold; color: #e2e8f0; margin-bottom: 8px;")
+        title = QLabel("◈ DASHBOARD OVERVIEW")
+        title.setStyleSheet("""
+            font-size: 24px; 
+            font-weight: bold; 
+            color: #00ffff;
+            font-family: 'Consolas', monospace;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        """)
         header_layout.addWidget(title)
         header_layout.addStretch()
         layout.addLayout(header_layout)
@@ -37,60 +44,79 @@ class DashboardView(QWidget):
         
         self.refresh()
     
-    def make_card(self, title, value, subtitle="", color="#3498db", icon=""):
+    def make_card(self, title, value, subtitle="", color="#00ffff", icon=""):
         frame = QFrame()
-        frame.setObjectName("cardFrame")
+        frame.setObjectName("cyberCard")
         frame.setStyleSheet(f"""
-            QFrame#cardFrame {{
-                background: qlineargradient(x1:0 y1:0, x2:1 y2:1, stop:0 {color}, stop:1 {self.darken_color(color)});
-                border-radius: 16px;
+            QFrame#cyberCard {{
+                background: qlineargradient(x1:0 y1:0, x2:1 y2:1, stop:0 rgba({self.hex_to_rgb(color)},0.15), stop:1 rgba({self.hex_to_rgb(color)},0.05));
+                border: 2px solid {color};
+                border-radius: 8px;
                 padding: 0px;
             }}
         """)
-        frame.setMinimumHeight(140)
-        frame.setMaximumWidth(320)
+        frame.setMinimumHeight(150)
+        frame.setMaximumWidth(340)
         
         card_layout = QVBoxLayout(frame)
-        card_layout.setContentsMargins(24, 20, 24, 20)
-        card_layout.setSpacing(8)
+        card_layout.setContentsMargins(20, 16, 20, 16)
+        card_layout.setSpacing(6)
         
         # Icon and title row
         top_layout = QHBoxLayout()
         if icon:
             icon_label = QLabel(icon)
-            icon_label.setStyleSheet("font-size: 28px; background: transparent;")
+            icon_label.setStyleSheet("font-size: 24px; background: transparent;")
             top_layout.addWidget(icon_label)
         top_layout.addStretch()
-        card_layout.addLayout(top_layout)
         
-        # Title
-        t = QLabel(title)
-        t.setStyleSheet("color: rgba(255,255,255,0.85); font-size: 14px; font-weight: 500; background: transparent;")
-        card_layout.addWidget(t)
+        # Title label
+        t = QLabel(title.upper())
+        t.setStyleSheet(f"""
+            color: {color}; 
+            font-size: 11px; 
+            font-weight: 700; 
+            background: transparent;
+            font-family: 'Consolas', monospace;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        """)
+        top_layout.addWidget(t)
+        card_layout.addLayout(top_layout)
         
         # Value
         v = QLabel(value)
-        v.setStyleSheet("color: white; font-size: 32px; font-weight: bold; background: transparent;")
+        v.setStyleSheet("""
+            color: #ffffff; 
+            font-size: 32px; 
+            font-weight: bold; 
+            background: transparent;
+            font-family: 'Consolas', monospace;
+        """)
         card_layout.addWidget(v)
         
         # Subtitle
         if subtitle:
             s = QLabel(subtitle)
-            s.setStyleSheet("color: rgba(255,255,255,0.7); font-size: 12px; background: transparent;")
+            s.setStyleSheet("""
+                color: rgba(0,255,255,0.6); 
+                font-size: 11px; 
+                background: transparent;
+                font-family: 'Consolas', monospace;
+            """)
             card_layout.addWidget(s)
         
         card_layout.addStretch()
         return frame
     
-    def darken_color(self, hex_color):
-        # Simple darken for gradient
+    def hex_to_rgb(self, hex_color):
+        """Convert hex color to RGB tuple string"""
         try:
             h = hex_color.lstrip('#')
             r, g, b = int(h[0:2],16), int(h[2:4],16), int(h[4:6],16)
-            r = max(0, int(r*0.8)); g = max(0, int(g*0.8)); b = max(0, int(b*0.8))
-            return f"#{r:02x}{g:02x}{b:02x}"
+            return f"{r},{g},{b}"
         except:
-            return hex_color
+            return "0,255,255"
     
     def refresh(self):
         # Clear grid
@@ -107,15 +133,23 @@ class DashboardView(QWidget):
             today = date.today()
             summary = get_monthly_summary(session, today.year, today.month)
             
-            # Row 0: Main metrics
-            self.grid.addWidget(self.make_card("Total Balance", f"{symbol}{total:,.2f}", "All accounts combined", "#2ecc71", "💰"), 0, 0)
-            self.grid.addWidget(self.make_card("Monthly Income", f"{symbol}{summary['income']:,.2f}", f"This month ({today.strftime('%B')})", "#3498db", "📥"), 0, 1)
-            self.grid.addWidget(self.make_card("Monthly Expense", f"{symbol}{summary['expense']:,.2f}", f"This month ({today.strftime('%B')})", "#e74c3c", "📤"), 0, 2)
-            self.grid.addWidget(self.make_card("Net Savings", f"{symbol}{summary['net']:,.2f}", "Income - Expenses", "#9b59b6", "💵"), 0, 3)
+            # Row 0: Main metrics with cyber colors
+            self.grid.addWidget(self.make_card("Total Balance", f"{symbol}{total:,.2f}", "All accounts combined", "#00ffff", "💰"), 0, 0)
+            self.grid.addWidget(self.make_card("Monthly Income", f"{symbol}{summary['income']:,.2f}", f"This month ({today.strftime('%B')})", "#00ff00", "📥"), 0, 1)
+            self.grid.addWidget(self.make_card("Monthly Expense", f"{symbol}{summary['expense']:,.2f}", f"This month ({today.strftime('%B')})", "#ff0055", "📤"), 0, 2)
+            self.grid.addWidget(self.make_card("Net Savings", f"{symbol}{summary['net']:,.2f}", "Income - Expenses", "#ff9900", "💵"), 0, 3)
             
             # Budgets section header
-            budget_header = QLabel("🎯 Budget Status")
-            budget_header.setStyleSheet("font-size: 20px; font-weight: 600; color: #e2e8f0; margin-top: 10px;")
+            budget_header = QLabel("◪ BUDGET STATUS")
+            budget_header.setStyleSheet("""
+                font-size: 18px; 
+                font-weight: bold; 
+                color: #00ffff; 
+                margin-top: 10px;
+                font-family: 'Consolas', monospace;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+            """)
             self.grid.addWidget(budget_header, 1, 0)
             
             # Budgets
@@ -132,15 +166,15 @@ class DashboardView(QWidget):
                 spent = b.get("spent", 0)
                 limit = b["budget"].amount_limit
                 
-                # Color based on usage
+                # Cyber color scheme based on usage
                 if pct < 50:
-                    color = "#2ecc71"  # Green - good
+                    color = "#00ff00"  # Green - good
                 elif pct < 80:
-                    color = "#f39c12"  # Orange - warning
+                    color = "#ffff00"  # Yellow - warning
                 elif pct < 100:
-                    color = "#e67e22"  # Dark orange - caution
+                    color = "#ff9900"  # Orange - caution
                 else:
-                    color = "#e74c3c"  # Red - over budget
+                    color = "#ff0055"  # Red - over budget
                 
                 card = self.make_card(
                     f"{cat.icon} {cat.name}", 
